@@ -13,9 +13,9 @@
 """
 Module for serving Flask App
 """
+from datetime import datetime
 import requests
 from flask import Flask, render_template, request
-from datetime import datetime
 
 GEOCODE_API_URL="https://geocode.maps.co"
 WEATHER_API_URL="https://api.weather.gov"
@@ -44,18 +44,18 @@ def get_daily_forecast(zip_code, city):
     Return a daily forecast for the upcoming week.
     """
     lat, lon, locale=get_lat_lon(zip_code, city)
-    forecast_api_urls=get_forecast_api_urls(lat, lon)
-    daily_forecast=requests.get(f"{forecast_api_urls['properties']['forecast']}", timeout=10).json()
-    return lat, lon, locale, daily_forecast
+    fc_api_urls=get_forecast_api_urls(lat, lon)
+    daily_fc=requests.get(f"{fc_api_urls['properties']['forecast']}", timeout=10).json()
+    return lat, lon, locale, daily_fc
 
 def get_hourly_forecast(zip_code, city):
     """
     Return a hourly forecast for the upcoming 12 hours.
     """
     lat, lon, locale=get_lat_lon(zip_code, city)
-    forecast_api_urls=get_forecast_api_urls(lat, lon)
-    hourly_forecast=requests.get(f"{forecast_api_urls['properties']['forecastHourly']}", timeout=10).json()
-    return lat, lon, locale, hourly_forecast
+    fc_api_urls=get_forecast_api_urls(lat, lon)
+    hourly_fc=requests.get(f"{fc_api_urls['properties']['forecastHourly']}", timeout=10).json()
+    return lat, lon, locale, hourly_fc
 
 @app.context_processor
 def utility_processor():
@@ -69,7 +69,7 @@ def utility_processor():
         t=datetime.strptime(dt_iso, "%Y-%m-%dT%H:%M:%S%z")
         t_12hour=t.strftime("%I:%M %p")
         return t_12hour
-    return dict(format_time=format_time)
+    return {"format_time": format_time}
 
 @app.route('/')
 def index():
@@ -97,7 +97,7 @@ def weather():
                                 locale=locale,
                                 forecasts=forecast['properties']['periods'][slice(0, 1, 1)]
                                 )
-        elif options[0] == 'daily':
+        if options[0] == 'daily':
             lat, lon, locale, forecast=get_daily_forecast(zip_code, city)
             return render_template('daily-weather.html',
                                 lat=lat,
@@ -105,7 +105,7 @@ def weather():
                                 locale=locale,
                                 forecasts=forecast['properties']['periods']
                                 )
-        elif options[0] == 'hourly':
+        if options[0] == 'hourly':
             lat, lon, locale, forecast=get_hourly_forecast(zip_code, city)
             return render_template('hourly-weather.html',
                                 lat=lat,
@@ -113,6 +113,5 @@ def weather():
                                 locale=locale,
                                 forecasts=forecast['properties']['periods'][slice(0, 12, 1)]
                                 )
-        else :
-            return None
+        return None
     return None
