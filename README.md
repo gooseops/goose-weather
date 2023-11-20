@@ -43,7 +43,20 @@ The goal of this repository is to provide an easy-to-launch self-hosted weather 
     ```
 - Server should be running on [http://127.0.0.1:8000](http://127.0.0.1:8000) on your local machine.
 ## Launching with Docker
-- Work in progress
+### Prerequisites
+- `Docker`
+    - See [docs](https://docs.docker.com/engine/install/) for installation on your OS.
+### Process
+- Launching from Docker Hub:
+    ```
+    docker run -p 8000:8000 gooseops/goose-weather:latest
+    ```
+- Building and launching locally:
+    ```
+    docker build -t goose-weather .
+    docker run -p 8000:8000 goose-weather
+    ```
+- Server should be running on [http://127.0.0.1:8000](http://127.0.0.1:8000) on your local machine.
 ## Launching on Kubernetes
 - Work in progress
 <!-- ### Manifest
