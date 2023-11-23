@@ -22,37 +22,38 @@ WEATHER_API_URL="https://api.weather.gov"
 
 app = Flask(__name__)
 
-def get_lat_lon(zip_code, city):
+def get_lat_lon(zip_code:str=None, city:str=None, state:str=None):
     """
     Return the coordinates and location based on a search.
     """
-    response=requests.get(f"{GEOCODE_API_URL}/search?q={zip_code}+{city}+US", timeout=10).json()
+    response=requests.get(f"{GEOCODE_API_URL}/search?q={zip_code}+{city}+{state}+US",
+                          timeout=10).json()
     lat=round(float(response[0]['lat']), 4)
     lon=round(float(response[0]['lon']), 4)
     locale=response[0]['display_name']
     return lat, lon, locale
 
-def get_forecast_api_urls(lat, lon):
+def get_forecast_api_urls(lat:str, lon:str):
     """
     Return the api urls for different typse of forecasts.
     """
     response=requests.get(f"{WEATHER_API_URL}/points/{lat},{lon}", timeout=10).json()
     return response
 
-def get_daily_forecast(zip_code, city):
+def get_daily_forecast(zip_code:str=None, city:str=None, state:str=None):
     """
     Return a daily forecast for the upcoming week.
     """
-    lat, lon, locale=get_lat_lon(zip_code, city)
+    lat, lon, locale=get_lat_lon(zip_code, city, state)
     fc_api_urls=get_forecast_api_urls(lat, lon)
     daily_fc=requests.get(f"{fc_api_urls['properties']['forecast']}", timeout=10).json()
     return lat, lon, locale, daily_fc
 
-def get_hourly_forecast(zip_code, city):
+def get_hourly_forecast(zip_code:str=None, city:str=None, state:str=None):
     """
     Return a hourly forecast for the upcoming 12 hours.
     """
-    lat, lon, locale=get_lat_lon(zip_code, city)
+    lat, lon, locale=get_lat_lon(zip_code, city, state)
     fc_api_urls=get_forecast_api_urls(lat, lon)
     hourly_fc=requests.get(f"{fc_api_urls['properties']['forecastHourly']}", timeout=10).json()
     return lat, lon, locale, hourly_fc
@@ -89,8 +90,9 @@ def weather():
         options=request.form.getlist('frequency')
         zip_code=request.form['zip_code']
         city=request.form['city']
+        state=request.form['state']
         if options[0] == 'current':
-            lat, lon, locale, forecast=get_hourly_forecast(zip_code, city)
+            lat, lon, locale, forecast=get_hourly_forecast(zip_code, city, state)
             return render_template('hourly-weather.html',
                                 lat=lat,
                                 lon=lon,
@@ -98,7 +100,7 @@ def weather():
                                 forecasts=forecast['properties']['periods'][slice(0, 1, 1)]
                                 )
         if options[0] == 'daily':
-            lat, lon, locale, forecast=get_daily_forecast(zip_code, city)
+            lat, lon, locale, forecast=get_daily_forecast(zip_code, city, state)
             return render_template('daily-weather.html',
                                 lat=lat,
                                 lon=lon,
@@ -106,7 +108,7 @@ def weather():
                                 forecasts=forecast['properties']['periods']
                                 )
         if options[0] == 'hourly':
-            lat, lon, locale, forecast=get_hourly_forecast(zip_code, city)
+            lat, lon, locale, forecast=get_hourly_forecast(zip_code, city, state)
             return render_template('hourly-weather.html',
                                 lat=lat,
                                 lon=lon,
