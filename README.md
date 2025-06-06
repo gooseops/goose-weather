@@ -51,18 +51,19 @@ The goal of this repository is to provide an easy-to-launch self-hosted weather 
 - Server should be running on [http://127.0.0.1:8000](http://127.0.0.1:8000) on your local machine.
 ## Launching with Docker
 ### Prerequisites
-(Currently out-dated)
 - `Docker`
     - See [docs](https://docs.docker.com/engine/install/) for installation on your OS.
 ### Process
 - Launching from Docker Hub:
     ```
-    docker run -p 8000:8000 gooseops/goose-weather:latest
+    export GEOCODE_API_KEY=<your-api-key-here>
+    docker run -e GEOCODE_API_KEY -p 8000:8000 gooseops/goose-weather:latest
     ```
 - Building and launching locally:
     ```
-    docker build -t goose-weather .
-    docker run -p 8000:8000 goose-weather
+    export GEOCODE_API_KEY=<your-api-key-here>
+    docker build -t goose-weather:local .
+    docker run -e GEOCODE_API_KEY -p 8000:8000 goose-weather:local
     ```
 - Server should be running on [http://127.0.0.1:8000](http://127.0.0.1:8000) on your local machine.
 ## Launching on Kubernetes
